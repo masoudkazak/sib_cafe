@@ -7,7 +7,7 @@ def home(request):
     return render(request, "account/home.html", {})
 
 
-class UserCreationView(CreateView):
+class UserRegisterView(CreateView):
     model = User
     template_name = "account/register.html"
     form_class = UserRegisterForm

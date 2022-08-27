@@ -1,7 +1,10 @@
 {% if request.user.is_authenticated %}
     <h1>{{ request.user.username }}</h1>
-    <a href="{% url 'account:logout' %}">Logout</a>
+    <a href="{% url 'account:logout' %}">Logout</a><br>
+    <a href="{% url 'account:password_change' %}">Change password</a><br>
 {% else %}
-    <a href="{% url 'account:login' %}">Login</a>
-    <a href="{% url 'account:register' %}">Register</a>
+    <a href="{% url 'account:login' %}">Login</a><br>
+    <a href="{% url 'account:register' %}">Register</a><br>
 {% endif %}
+
+<a href="{% url 'account:password_reset' %}">Forget password</a>
