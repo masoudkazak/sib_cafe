@@ -3,6 +3,7 @@ from slugify import slugify
 from django.core.validators import MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 from taggit.managers import TaggableManager
+from django.contrib.auth.models import User
 
 
 class Food(models.Model):
@@ -43,25 +44,60 @@ class FoodItem(models.Model):
         verbose_name_plural = _("fooditems")
         verbose_name = _("fooditem")
     
-    def total_pirce(self):
+    def total_price(self):
         total = self.food.final_price() * self.amount
         return total
     
     def __str__(self):
         return f"{self.food.title} - {self.amount}"
- 
+
 
 class OrderItem(models.Model):
-    pass
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    food = models.ForeignKey(Food, on_delete=models.CASCADE)
+    amount = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ["user", "food"]
+        verbose_name_plural = _("orderitems")
+        verbose_name = _("orderitem")
+    
+    def get_price(self):
+        if self.amount:
+            price = int(self.amount * self.food.final_price())
+            return price
+        return self.food.final_price()
+    
+    def __str__(self):
+        return self.user.username
 
 
 class Order(models.Model):
-    pass
+    STATUS = [
+        ("0", "Order"),
+        ("1", "Cancel"),
+        ("2", "Accept"),
+        ("3", "Paid"),
+        ("4", "Debt")
+    ]
 
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    orders = models.ManyToManyField(OrderItem)
+    status = models.CharField(choices=STATUS, max_length=1, default=0)
+    created = models.DateTimeField(auto_now_add=True)
 
-class Archive(models.Model):
-    pass
-
-
-class Review(models.Model):
-    pass
+    class Meta:
+        ordering = ["-created"]
+        verbose_name_plural =  _("oredrs")
+        verbose_name = _("ordeer")
+    
+    def get_total_price(self):
+        if self.orders.all():
+            price = 0
+            for item in self.orders.all():
+                price += item.get_price()
+            return price
+        return 0
+    
+    def __str__(self):
+        return self.user.username

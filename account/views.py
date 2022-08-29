@@ -3,9 +3,6 @@ from django.views.generic import CreateView
 from django.contrib.auth.models import User
 from .forms import UserRegisterForm
 
-def home(request):
-    return render(request, "account/home.html", {})
-
 
 class UserRegisterView(CreateView):
     model = User
