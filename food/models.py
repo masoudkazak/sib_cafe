@@ -1,3 +1,4 @@
+from xmlrpc.client import TRANSPORT_ERROR
 from django.db import models
 from slugify import slugify
 from django.core.validators import MaxValueValidator
@@ -7,7 +8,7 @@ from django.contrib.auth.models import User
 
 
 class Food(models.Model):
-    title = models.CharField(max_length=25, verbose_name=_("title"))
+    title = models.CharField(max_length=25, verbose_name=_("title"), unique=True)
     image = models.ImageField(upload_to="%Y/%m/%d/", verbose_name=_("image"), blank=True, null=True)
     price = models.PositiveIntegerField(verbose_name=_("price"))
     discount = models.PositiveIntegerField(default=0, validators=[MaxValueValidator(100)], verbose_name=_("discount"))
@@ -38,6 +39,8 @@ class FoodItem(models.Model):
     amount = models.PositiveIntegerField(verbose_name=_("amount"))
     days = TaggableManager()
     is_limit = models.BooleanField(default=True, verbose_name=_("is_limit"))
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["food", "amount"]
@@ -56,6 +59,8 @@ class OrderItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(default=1)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["user", "food"]
@@ -84,10 +89,12 @@ class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     orders = models.ManyToManyField(OrderItem)
     status = models.CharField(choices=STATUS, max_length=1, default=0)
+    debt =models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["-created"]
+        ordering = ["-updated"]
         verbose_name_plural =  _("oredrs")
         verbose_name = _("ordeer")
     
@@ -100,4 +107,4 @@ class Order(models.Model):
         return 0
     
     def __str__(self):
-        return self.user.username
+        return f"{self.user.username} - {self.updated}"
