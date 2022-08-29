@@ -21,6 +21,7 @@ INSTALLED_APPS = [
 
     "account",
     "food",
+    "taggit",
 ]
 
 MIDDLEWARE = [
