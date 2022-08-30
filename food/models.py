@@ -47,18 +47,23 @@ class FoodItem(models.Model):
         verbose_name_plural = _("fooditems")
         verbose_name = _("fooditem")
     
-    def total_price(self):
-        total = self.food.final_price() * self.amount
-        return total
-    
     def __str__(self):
         return f"{self.food.title} - {self.amount}"
 
 
 class OrderItem(models.Model):
+    STATUS = [
+        ("0", "Order"),
+        ("1", "Cancel"),
+        ("2", "Accept"),
+        ("3", "Paid"),
+        ("4", "Debt")
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(default=1)
+    status = models.CharField(choices=STATUS, max_length=1, default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -78,17 +83,8 @@ class OrderItem(models.Model):
 
 
 class Order(models.Model):
-    STATUS = [
-        ("0", "Order"),
-        ("1", "Cancel"),
-        ("2", "Accept"),
-        ("3", "Paid"),
-        ("4", "Debt")
-    ]
-
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     orders = models.ManyToManyField(OrderItem)
-    status = models.CharField(choices=STATUS, max_length=1, default=0)
     debt =models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
