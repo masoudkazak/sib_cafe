@@ -22,7 +22,6 @@ INSTALLED_APPS = [
 
     "account",
     "food",
-    "taggit",
     'rest_framework',
     'rest_framework_simplejwt',
 ]
