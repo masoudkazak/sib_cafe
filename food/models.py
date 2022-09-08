@@ -2,6 +2,7 @@ from django.db import models
 from slugify import slugify
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Food(models.Model):
@@ -28,17 +29,17 @@ class Food(models.Model):
 
 
 class FoodItem(models.Model):
-    DAYS = [
-        ("0", "Everyday"),
-        ("1", "Monday"),
-        ("2", "Tuesday"),
-        ("3", "Wednesday"),
-        ("4", "Saturday"),
-        ("5", "Sunday")
-    ]
+    class Days(models.IntegerChoices):
+        Everyday = 0
+        Monday = 1
+        Tuesday = 2
+        Wednesday = 3
+        Saturday = 4
+        Sunday = 5
+
     food = models.OneToOneField(Food, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(blank=True, null=True, verbose_name=_("amount"))
-    days = models.CharField(choices=DAYS, max_length=1, default="0", verbose_name=_("days"))
+    days = models.IntegerField(choices=Days.choices, default=0, verbose_name=_("days"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -52,18 +53,17 @@ class FoodItem(models.Model):
 
 
 class OrderItem(models.Model):
-    STATUS = [
-        ("0", "Order"),
-        ("1", "Cancel"),
-        ("2", "Accept"),
-        ("3", "Paid"),
-        ("4", "Debt")
-    ]
+    class Status(models.IntegerChoices):
+        Order = 0
+        Cancel = 1
+        Accept = 2
+        Paid = 3
+        Debt = 4
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(default=1, verbose_name=_("amount"))
-    status = models.CharField(choices=STATUS, max_length=1, default=0, verbose_name=_("status"))
+    status = models.IntegerField(choices=Status.choices, default=0, verbose_name=_("status"))
     real_price = models.PositiveIntegerField(default=0, verbose_name=_("real_price"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -86,17 +86,17 @@ class OrderItem(models.Model):
 
 
 class Review(models.Model):
-    POINTS = [
-        ("1", "One Point"),
-        ("2", "Two Points"),
-        ("3", "Three Points"),
-        ("4", "Four Points"),
-        ("5", "Five Points"),
-    ]
+    class Points(models.IntegerChoices):
+        zero_point = 0
+        one_point = 1
+        two_points = 2
+        three_points = 3
+        four_points = 4
+        five_points = 5
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
-    value = models.CharField(choices=POINTS, max_length=1, default="5", verbose_name=_("value"))
+    value = models.IntegerField(choices=Points.choices, verbose_name=_("value"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
