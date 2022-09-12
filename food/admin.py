@@ -20,7 +20,8 @@ class FoodItemAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ["user", "food","amount", "status"]
+    list_display = ["user", "food", "status", "updated"]
+    ordering = ["-updated"]
     list_filter = ["created", "status"]
     search_fields = ['user__username']
     actions = ["make_accept", "make_paid"]

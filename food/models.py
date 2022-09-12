@@ -2,7 +2,8 @@ from django.db import models
 from slugify import slugify
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator, MaxValueValidator
+import datetime
+from django.db.models import Q
 
 
 class Food(models.Model):
@@ -30,12 +31,12 @@ class Food(models.Model):
 
 class FoodItem(models.Model):
     class Days(models.IntegerChoices):
-        Everyday = 0
-        Monday = 1
-        Tuesday = 2
-        Wednesday = 3
-        Saturday = 4
-        Sunday = 5
+        Monday = 0
+        Tuesday = 1
+        Wednesday = 2
+        Saturday = 5
+        Sunday = 6
+        Everyday = 7 
 
     food = models.OneToOneField(Food, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(blank=True, null=True, verbose_name=_("amount"))
@@ -48,6 +49,11 @@ class FoodItem(models.Model):
         verbose_name_plural = _("fooditems")
         verbose_name = _("fooditem")
     
+    def daily_food_ids(self):
+        today = datetime.date.today().weekday()
+        daily_food = list(FoodItem.objects.filter(Q(days=today) | Q(days=7)).values_list('food', flat=True))
+        return daily_food
+
     def __str__(self):
         return f"{self.food.title} - {self.amount}"
 
@@ -62,9 +68,8 @@ class OrderItem(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
-    amount = models.PositiveIntegerField(default=1, verbose_name=_("amount"))
     status = models.IntegerField(choices=Status.choices, default=0, verbose_name=_("status"))
-    real_price = models.PositiveIntegerField(default=0, verbose_name=_("real_price"))
+    real_price = models.PositiveIntegerField(verbose_name=_("real_price"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -72,14 +77,6 @@ class OrderItem(models.Model):
         ordering = ["updated", "status"]
         verbose_name_plural = _("orderitems")
         verbose_name = _("orderitem")
-    
-    def total_price(self):
-        price = int(self.amount * self.food.price)
-        return price
-    
-    def real_price(self):
-        if not self.real_price and (self.status == "3" or self.status == "4"):
-            self.real_price += self.total_price()
     
     def __str__(self):
         return self.user.username
@@ -95,7 +92,7 @@ class Review(models.Model):
         five_points = 5
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    food = models.ForeignKey(Food, on_delete=models.CASCADE)
+    food = models.ForeignKey(Food, related_name="reviews", on_delete=models.CASCADE)
     value = models.IntegerField(choices=Points.choices, verbose_name=_("value"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
