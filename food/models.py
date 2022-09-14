@@ -48,11 +48,6 @@ class FoodItem(models.Model):
         ordering = ["food", "amount"]
         verbose_name_plural = _("fooditems")
         verbose_name = _("fooditem")
-    
-    def daily_food_ids(self):
-        today = datetime.date.today().weekday()
-        daily_food = list(FoodItem.objects.filter(Q(days=today) | Q(days=7)).values_list('food', flat=True))
-        return daily_food
 
     def __str__(self):
         return f"{self.food.title} - {self.amount}"
@@ -101,6 +96,16 @@ class Review(models.Model):
         ordering = ["food"]
         verbose_name_plural = _("reviews")
         verbose_name = _("review")
+    
+    def avg_value_food(self, food):
+        reviews = Review.objects.filter(food=food)
+        if reviews.exists():
+            avg = 0
+            for review in reviews:
+                avg += review.value
+
+            return int(avg/reviews.count())
+        return 0
     
     def __str__(self):
         return self.food.title
