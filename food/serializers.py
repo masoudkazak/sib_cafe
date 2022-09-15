@@ -66,6 +66,11 @@ class OrderCancelSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ("status", "food")
+    
+    def validate_status(self, value):
+        if value != 1:
+            raise serializers.ValidationError()
+        return value
         
 
 class OrderListSerializer(serializers.ModelSerializer):
@@ -79,6 +84,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ("user", "food", "value")
+    
+    def validate_value(self, value):
+        if value > 5 or value < 0:
+            raise serializers.ValidationError()
+        return value
+    
+    def validate_food(self, value):
+        if not value.is_limit:
+            raise serializers.ValidationError()
+        return value
     
     def create(self, validated_data):
         try:
@@ -103,4 +118,3 @@ class FoodReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Food
         fields = ("title", "reviews")
-

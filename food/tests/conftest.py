@@ -3,6 +3,7 @@ from ..models import *
 import pytest
 from rest_framework.test import APIClient
 from django.contrib.auth.models import User
+from model_bakery import baker
 
 
 def user_create():
@@ -96,3 +97,31 @@ def fooditem_create_bad_days():
         days=tomorrow
         )
     return fooditem
+
+
+@pytest.fixture
+def orderitem_create_for_cancel():
+    food = Food.objects.create(
+        title="polo",
+        price=10000,
+        is_limit=True,
+        description="dadsadajdooj",
+    )
+    orderitem = OrderItem.objects.create(
+        food=food,
+        user=user_create(),
+        status=0,
+        real_price=10000
+        )
+    return orderitem
+
+
+@pytest.fixture
+def unlimit_food_create_fixture():
+    food = Food.objects.create(
+        title="mast",
+        price=10000,
+        is_limit=False,
+        description="dadsadajdooj",
+    )
+    return food
