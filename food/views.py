@@ -2,12 +2,15 @@ from rest_framework import filters
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
+
+import datetime
+
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+
+from .permissions import TimePermission
 from .models import *
 from .serializers import *
-from django.shortcuts import get_object_or_404
-import datetime
-from django.db.models import Q
-from .permissions import TimePermission
 
 
 class Menu(ListAPIView):
@@ -64,7 +67,7 @@ class OrderListAPIView(ListAPIView):
 
 
 class RateCreateAPIView(CreateAPIView):
-    serializer_class = ReviewSerializer
+    serializer_class = ReviewCreateSerializer
     queryset = Review.objects.all()
     permission_classes = [IsAuthenticated]
     
@@ -78,3 +81,4 @@ class Leaderboard(ListAPIView):
     pagination_class = LimitOffsetPagination
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['price']
+

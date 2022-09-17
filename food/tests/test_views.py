@@ -3,7 +3,8 @@ from rest_framework import status
 from django.urls import reverse
 import random
 
-from food.models import Review
+from food.models import Food
+from django.core.cache import cache
 
 
 pytestmark = pytest.mark.django_db
@@ -139,3 +140,9 @@ def test_review_create_validate_kind_of_item_http_400(api_client, user_create_fi
     response = api_client.post(reverse("food:add-review"), new_rate)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_reviews_list_HTTP_200(api_client, review_create):
+    response = api_client.get(reverse("food:reviews"))
+    food = Food.objects.get(title="chelo")
+    assert cache.get(food) != None

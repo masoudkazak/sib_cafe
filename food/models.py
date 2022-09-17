@@ -2,8 +2,6 @@ from django.db import models
 from slugify import slugify
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
-import datetime
-from django.db.models import Q
 
 
 class Food(models.Model):
@@ -97,14 +95,13 @@ class Review(models.Model):
         verbose_name_plural = _("reviews")
         verbose_name = _("review")
     
-    def avg_value_food(self, food):
+    def total_value(self, food):
         reviews = Review.objects.filter(food=food)
         if reviews.exists():
-            avg = 0
+            total = 0
             for review in reviews:
-                avg += review.value
-
-            return int(avg/reviews.count())
+                total += review.value
+            return total
         return 0
     
     def __str__(self):

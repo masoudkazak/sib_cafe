@@ -37,5 +37,5 @@ class OrderItemAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ["food", "user"]
+    list_display = ["food", "value", "user"]
     search_fields = ["food__title"]
