@@ -6,14 +6,24 @@ import datetime
 
 class FoodSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField("get_image_url")
+    avg_rate = serializers.SerializerMethodField("get_avg_rate")
 
     class Meta:
         model = Food
-        fields = ("title", "image", "price", "description")
+        fields = ("title", "image", "price", "description", "avg_rate")
 
     def get_image_url(self, obj):
         if obj.image:
             return obj.image.url
+    
+    def get_avg_rate(self, obj):
+        key = obj.title
+        if cache.get(key) is None:
+            cache.set(key, Review().total_value(obj))
+        count = Review.objects.filter(food=obj.pk).count()
+        if not count:
+            return 0
+        return cache.get(key)/count
     
 
 class FoodItemSerializer(serializers.ModelSerializer):
@@ -35,7 +45,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
         if fooditem.days != today and fooditem.days != 7:
             raise serializers.ValidationError("Not Today")
-        elif not fooditem.amount:
+        if not fooditem.amount:
             raise serializers.ValidationError("Finished")
 
         return value
@@ -44,8 +54,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         if value != 0:
             raise serializers.ValidationError("")
         return value
-        
-    
+
     def create(self, validated_data):
         order_food = OrderItem.objects.filter(user=validated_data["user"], status=0, food__is_limit=True)
             

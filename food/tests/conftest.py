@@ -3,7 +3,7 @@ from ..models import *
 import pytest
 from rest_framework.test import APIClient
 from django.contrib.auth.models import User
-from model_bakery import baker
+import datetime
 
 
 def user_create():
@@ -107,6 +107,13 @@ def orderitem_create_for_cancel():
         is_limit=True,
         description="dadsadajdooj",
     )
+
+    FoodItem.objects.create(
+        food=food,
+        amount=10,
+        days=datetime.date.today().weekday()
+    )
+
     orderitem = OrderItem.objects.create(
         food=food,
         user=user_create(),

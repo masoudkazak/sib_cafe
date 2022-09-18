@@ -3,8 +3,9 @@ from rest_framework import status
 from django.urls import reverse
 import random
 
-from food.models import Food
+from food.models import Food, OrderItem, FoodItem
 from django.core.cache import cache
+import datetime
 
 
 pytestmark = pytest.mark.django_db
@@ -51,8 +52,9 @@ def test_create_order_validate_status_HTTP_400(api_client, food_create_fixture, 
 
 def test_create_order_validate_day_HTTP_400(api_client, fooditem_create_bad_days, user_create_fixture):
     api_client.force_authenticate(user=user_create_fixture)
+
     order_create = {
-        "food":fooditem_create_bad_days.food.id,
+        "food":fooditem_create_bad_days.food,
         "status":0,
         "user":user_create_fixture.id,
     }
