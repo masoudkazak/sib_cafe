@@ -59,7 +59,7 @@ class OrderItem(models.Model):
         Paid = 3
         Debt = 4
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
     status = models.IntegerField(choices=Status.choices, default=0, verbose_name=_("status"))
     real_price = models.PositiveIntegerField(verbose_name=_("real_price"))

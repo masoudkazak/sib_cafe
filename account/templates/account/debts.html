@@ -1,0 +1,8 @@
+{% extends "admin/base_site.html" %}
+{% load account_tags %}
+
+{% block content %}
+    {% for user in users %}
+        <h1>{{ user }} = {{ user|get_user_debt:user.id }}</h1><br>
+    {% endfor %}
+{% endblock %}

@@ -2,12 +2,12 @@ from rest_framework import filters
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
-from django.db.models import Avg
 
 import datetime
 
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.db.models import Avg
 
 from .permissions import TimePermission
 from .models import *

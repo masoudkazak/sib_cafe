@@ -6,31 +6,32 @@ import datetime
 
 class FoodSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField("get_image_url")
-    avg_rate = serializers.SerializerMethodField("get_avg_rate")
-
+    
     class Meta:
         model = Food
-        fields = ("title", "image", "price", "description", "avg_rate")
+        fields = ("title", "image", "price", "description")
 
     def get_image_url(self, obj):
         if obj.image:
             return obj.image.url
     
-    def get_avg_rate(self, obj):
-        key = obj.title
-        if cache.get(key) is None:
-            cache.set(key, Review().total_value(obj))
-        count = Review.objects.filter(food=obj.pk).count()
-        if not count:
-            return 0
-        return cache.get(key)/count
-    
 
 class FoodItemSerializer(serializers.ModelSerializer):
     food = FoodSerializer(read_only=True)
+    avg_rate = serializers.SerializerMethodField("get_avg_rate")
+
     class Meta:
         model = FoodItem
-        fields = ("food", "amount")
+        fields = ("food", "amount", "avg_rate")
+    
+    def get_avg_rate(self, obj):
+        key = obj.food.title
+        if cache.get(key) is None:
+            cache.set(key, Review().total_value(obj.food))
+        count = Review.objects.filter(food=obj.food).count()
+        if not count:
+            return 0
+        return cache.get(key)/count
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
@@ -57,13 +58,13 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         order_food = OrderItem.objects.filter(user=validated_data["user"], status=0, food__is_limit=True)
-            
+
         if order_food.exists() and validated_data["food"].is_limit:
             fooditem = FoodItem.objects.get(food=order_food[0].food)
             fooditem.amount += 1
             fooditem.save()
             order_food[0].delete()
-
+        
         new_fooditem = FoodItem.objects.get(food=validated_data["food"])
         new_fooditem.amount -= 1
         new_fooditem.save()
@@ -122,14 +123,18 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         try:
             my_review = Review.objects.get(
-                user=validated_data['user'],
+                user=validated_data["user"],
                 food=validated_data["food"]
                 )
         except Review.DoesNotExist:
             pass
         else:
-            my_review.delete()        
-        review = Review(**validated_data)
+            my_review.delete()
+        review = Review(
+            user=validated_data["user"],
+            food=validated_data["food"],
+            value=validated_data["value"]
+        )
         review.save()
         return review
 
@@ -144,5 +149,8 @@ class FoodReviewSerializer(serializers.ModelSerializer):
         key = obj.title
         if cache.get(key) is None:
             cache.set(key, Review().total_value(obj))
-        return cache.get(key)
+        count = Review.objects.filter(food=obj).count()
+        if not count:
+            return 0
+        return cache.get(key)/count
     

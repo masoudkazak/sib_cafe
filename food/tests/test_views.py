@@ -3,9 +3,8 @@ from rest_framework import status
 from django.urls import reverse
 import random
 
-from food.models import Food, OrderItem, FoodItem
+from food.models import Food
 from django.core.cache import cache
-import datetime
 
 
 pytestmark = pytest.mark.django_db
