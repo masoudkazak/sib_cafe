@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.db.models import Avg
 
-from .permissions import TimePermission
+from .permissions import TimePermission, IsUserOrdered
 from .models import *
 from .serializers import *
 
@@ -39,13 +39,10 @@ class OrderCreateAPIView(CreateAPIView):
     queryset = OrderItem.objects.all()
     permission_classes = [IsAuthenticated, TimePermission]
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
 
 class OrderCancelAPIView(RetrieveUpdateAPIView):
     serializer_class = OrderCancelSerializer
-    permission_classes = [IsAuthenticated, TimePermission]
+    permission_classes = [IsAuthenticated, TimePermission, IsUserOrdered]
 
     def get_object(self):
         orderitem = get_object_or_404(OrderItem,
@@ -71,9 +68,6 @@ class RateCreateAPIView(CreateAPIView):
     serializer_class = ReviewCreateSerializer
     queryset = Review.objects.all()
     permission_classes = [IsAuthenticated]
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
 
 class Leaderboard(ListAPIView):
@@ -82,4 +76,3 @@ class Leaderboard(ListAPIView):
     pagination_class = LimitOffsetPagination
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['price']
-
