@@ -18,13 +18,16 @@ class FoodSerializer(serializers.ModelSerializer):
 
 class FoodItemSerializer(serializers.ModelSerializer):
     food = FoodSerializer(read_only=True)
-    avg_rate = serializers.SerializerMethodField("get_avg_rate")
+    rate_avg = serializers.SerializerMethodField("get_avg_rate")
 
     class Meta:
         model = FoodItem
-        fields = ("food", "amount", "avg_rate")
+        fields = ("food", "amount", "rate_avg")
     
     def get_avg_rate(self, obj):
+        if not obj.food.is_limit:
+            return "Can not rating"
+
         key = obj.food.title
         if cache.get(key) is None:
             cache.set(key, Review().total_value(obj.food))
@@ -140,12 +143,12 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
 
 
 class FoodReviewSerializer(serializers.ModelSerializer):
-    total_rate = serializers.SerializerMethodField("get_total_rate")
+    avg_rate = serializers.SerializerMethodField("get_avg_rate")
     class Meta:
         model = Food
-        fields = ("title", "total_rate")
+        fields = ("title", "avg_rate")
     
-    def get_total_rate(self, obj):
+    def get_avg_rate(self, obj):
         key = obj.title
         if cache.get(key) is None:
             cache.set(key, Review().total_value(obj))
@@ -153,4 +156,3 @@ class FoodReviewSerializer(serializers.ModelSerializer):
         if not count:
             return 0
         return cache.get(key)/count
-    

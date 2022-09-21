@@ -101,6 +101,26 @@ def test_cancel_order_validate_status_HTTP_400(api_client, orderitem_create_for_
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
+def test_cancel_order_another_user_submit(api_client, orderitem_create_for_cancel, user_create_fixture):
+    order = orderitem_create_for_cancel
+    api_client.force_authenticate(user=user_create_fixture)
+    
+    update_order = {
+            "food":order.food.pk,
+            "status":1
+        }
+    
+    response = api_client.put(reverse(
+        "food:order-cancel",
+        kwargs={"pk":order.pk,
+                "username":order.user.username
+        }),
+        update_order
+        )
+
+    assert order.status != 1
+
+
 def test_order_list_HTTP_200(api_client, user_create_fixture):
     api_client.force_authenticate(user=user_create_fixture)
     response = api_client.get(reverse("food:orders"))

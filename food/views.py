@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.db.models import Avg
 
-from .permissions import TimePermission, IsUserOrdered
+from .permissions import TimePermission, IsUserOrdered, IsCanCancelOrder
 from .models import *
 from .serializers import *
 
@@ -42,7 +42,7 @@ class OrderCreateAPIView(CreateAPIView):
 
 class OrderCancelAPIView(RetrieveUpdateAPIView):
     serializer_class = OrderCancelSerializer
-    permission_classes = [IsAuthenticated, TimePermission, IsUserOrdered]
+    permission_classes = [IsAuthenticated, IsCanCancelOrder, IsUserOrdered]
 
     def get_object(self):
         orderitem = get_object_or_404(OrderItem,

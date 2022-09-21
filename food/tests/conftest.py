@@ -64,7 +64,7 @@ def review_create():
 @pytest.fixture
 def user_create_fixture():
     user = user = User.objects.create_user(
-        username="someone",
+        username="someone1",
         password="something"
         )
     return user
