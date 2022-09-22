@@ -1,0 +1,9 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}{{ request.user }}{% endblock title %}
+
+{% block content %}
+    {% for debt in mydebts %}
+        <h1>{{ forloop.counter }}-{{ debt.food }} - {{ debt.real_price }} - {{ debt.created }}</h1><br>
+    {% endfor %}
+{% endblock %}

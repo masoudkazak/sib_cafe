@@ -10,7 +10,7 @@ from django.views.generic import ListView
 
 from .serializers import UserRegisterSerializer, LoginSerializer
 from food.models import OrderItem
-from .mixins import SuperuserRequiredMixin
+from .mixins import SuperuserRequiredMixin, IsOwnerOrSuperuser
 
 
 class UserRegisterAPIView(CreateAPIView):
@@ -42,3 +42,13 @@ class DebtListView(SuperuserRequiredMixin, ListView):
     queryset = User.objects.filter(pk__in=list(orders_id))
     template_name = "account/debts.html"
     context_object_name = "users"
+
+
+class DebtDetailView(IsOwnerOrSuperuser, ListView):
+    template_name = "account/mydebts.html"
+    context_object_name = "mydebts"
+    
+    def get_queryset(self):
+        queryset = OrderItem.objects.filter(status=4,
+                                            user__username=self.kwargs["username"])
+        return queryset

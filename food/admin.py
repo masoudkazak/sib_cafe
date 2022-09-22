@@ -2,12 +2,17 @@ from django.contrib import admin
 from .models import *
 
 
+class FoodItemInline(admin.TabularInline):
+    model = FoodItem
+
+
 @admin.register(Food)
 class FoodAdmin(admin.ModelAdmin):
     list_display = ["title", "price", "updated"]
     list_editable = ['price']
     search_fields = ["title", "description"]
     prepopulated_fields = {"slug": ("title",)}
+    inlines = [FoodItemInline]
 
 
 @admin.register(FoodItem)
@@ -25,6 +30,7 @@ class OrderItemAdmin(admin.ModelAdmin):
     list_filter = ["created", "status"]
     search_fields = ['user__username']
     actions = ["make_accept", "make_paid"]
+    list_editable = ["status"]
 
     @admin.action(description="Accept")
     def make_accept(self, request, queryset):

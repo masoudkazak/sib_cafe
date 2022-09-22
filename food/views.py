@@ -39,6 +39,9 @@ class OrderCreateAPIView(CreateAPIView):
     queryset = OrderItem.objects.all()
     permission_classes = [IsAuthenticated, TimePermission]
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 class OrderCancelAPIView(RetrieveUpdateAPIView):
     serializer_class = OrderCancelSerializer
