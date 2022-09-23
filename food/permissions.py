@@ -24,4 +24,3 @@ class IsCanCancelOrder(permissions.BasePermission):
         if now >= start and now <= end:
             return True
         return False
-        return True

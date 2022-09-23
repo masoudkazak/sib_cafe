@@ -1,7 +1,9 @@
+import re
 from rest_framework import serializers
 from .models import *
 from django.core.cache import cache
 import datetime
+from django.db.models import Sum
 
 
 class FoodSerializer(serializers.ModelSerializer):
@@ -30,10 +32,13 @@ class FoodItemSerializer(serializers.ModelSerializer):
 
         key = obj.food.title
         if cache.get(key) is None:
-            cache.set(key, Review().total_value(obj.food))
-        count = Review.objects.filter(food=obj.food).count()
-        if not count:
+            total_value = Review.objects.filter(food=obj.food).aggregate(Sum("value"))["value__sum"]
+            cache.set(key, total_value)
+
+        if not cache.get(key):
             return 0
+            
+        count = Review.objects.filter(food=obj.food).count() 
         return cache.get(key)/count
 
 
@@ -49,7 +54,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
         if fooditem.days != today and fooditem.days != 7:
             raise serializers.ValidationError("Not Today")
-        if not fooditem.amount:
+        if not fooditem.amount and fooditem.food.is_limit:
             raise serializers.ValidationError("Finished")
 
         return value
@@ -67,10 +72,11 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             fooditem.amount += 1
             fooditem.save()
             order_food[0].delete()
-        
-        new_fooditem = FoodItem.objects.get(food=validated_data["food"])
-        new_fooditem.amount -= 1
-        new_fooditem.save()
+
+        if validated_data["food"].is_limit:
+            new_fooditem = FoodItem.objects.get(food=validated_data["food"])
+            new_fooditem.amount -= 1
+            new_fooditem.save()
 
         order = OrderItem(
             user=validated_data["user"],
@@ -96,8 +102,9 @@ class OrderCancelSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         fooditem = FoodItem.objects.get(food=validated_data["food"])
-        fooditem.amount += 1
-        fooditem.save()
+        if fooditem.food.is_limit:
+            fooditem.amount += 1
+            fooditem.save()
         return super().update(instance, validated_data)
         
 
@@ -151,8 +158,11 @@ class FoodReviewSerializer(serializers.ModelSerializer):
     def get_avg_rate(self, obj):
         key = obj.title
         if cache.get(key) is None:
-            cache.set(key, Review().total_value(obj))
-        count = Review.objects.filter(food=obj).count()
-        if not count:
+            total_value = Review.objects.filter(food=obj).aggregate(Sum("value"))["value__sum"]
+            cache.set(key, total_value)
+
+        if not cache.get(key):
             return 0
+
+        count = Review.objects.filter(food=obj).count() 
         return cache.get(key)/count

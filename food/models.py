@@ -95,14 +95,5 @@ class Review(models.Model):
         verbose_name_plural = _("reviews")
         verbose_name = _("review")
     
-    def total_value(self, food):
-        reviews = Review.objects.filter(food=food)
-        if reviews.exists():
-            total = 0
-            for review in reviews:
-                total += review.value
-            return total
-        return 0
-    
     def __str__(self):
         return self.food.title
