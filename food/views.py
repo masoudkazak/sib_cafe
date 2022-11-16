@@ -9,13 +9,12 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.db.models import Avg
 
-from .permissions import TimePermission, IsUserOrdered, IsCanCancelOrder
+from .permissions import IsUserOrdered
 from .models import *
 from .serializers import *
 
 
-class Menu(ListAPIView):
-    permission_classes = [TimePermission]    
+class Menu(ListAPIView): 
     pagination_class = LimitOffsetPagination
     today = datetime.date.today().weekday()
     queryset = FoodItem.objects.filter(Q(days=today) | Q(days=7)).annotate(rate_avg=Avg("food__reviews__value"))
@@ -26,7 +25,6 @@ class Menu(ListAPIView):
 
 
 class MenuItem(RetrieveAPIView):
-    permission_classes = [TimePermission]
     serializer_class = FoodItemSerializer
     
     def get_object(self):
@@ -37,7 +35,7 @@ class MenuItem(RetrieveAPIView):
 class OrderCreateAPIView(CreateAPIView):
     serializer_class = OrderCreateSerializer
     queryset = OrderItem.objects.all()
-    permission_classes = [IsAuthenticated, TimePermission]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -45,7 +43,7 @@ class OrderCreateAPIView(CreateAPIView):
 
 class OrderCancelAPIView(RetrieveUpdateAPIView):
     serializer_class = OrderCancelSerializer
-    permission_classes = [IsAuthenticated, IsCanCancelOrder, IsUserOrdered]
+    permission_classes = [IsAuthenticated, IsUserOrdered]
 
     def get_object(self):
         orderitem = get_object_or_404(OrderItem,
