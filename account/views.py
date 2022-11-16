@@ -38,10 +38,13 @@ class UserLogoutView(APIView):
 
 
 class DebtListView(SuperuserRequiredMixin, ListView):
-    orders_id = OrderItem.objects.filter(status=4).values_list("user", flat=True)
-    queryset = User.objects.filter(pk__in=list(orders_id))
     template_name = "account/debts.html"
     context_object_name = "users"
+
+    def get_queryset(self):
+        orders_id = OrderItem.objects.filter(status=4).values_list("user", flat=True)
+        queryset = User.objects.filter(pk__in=list(orders_id))
+        return queryset
 
 
 class DebtDetailView(IsOwnerOrSuperuser, ListView):

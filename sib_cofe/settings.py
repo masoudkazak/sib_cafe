@@ -1,12 +1,11 @@
 from pathlib import Path
-from decouple import config
 import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = "64m25mfo^p%=zm$7ka851!rme@-)6vxk8@su*u=i@tqme5=+()"
 
 DEBUG = True
 
@@ -24,7 +23,6 @@ INSTALLED_APPS = [
     "food",
 
     'rest_framework',
-    'rest_framework_simplejwt',
     'django_filters',
 ]
 
@@ -61,11 +59,11 @@ WSGI_APPLICATION = 'sib_cofe.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': config("NAME"),
+        'NAME': "sib_cafe",
         'USER': "root",
-        'PASSWORD': config("PASSWORD"),
-        'HOST': config("HOST"),
-        'PORT': config("PORT"),
+        'PASSWORD': "1",
+        'HOST': "localhost",
+        'PORT': "3306",
     }
 }
 
@@ -107,17 +105,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = "/accounts/"
 LOGOUT_REDIRECT_URL = "/accounts/"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
@@ -125,7 +114,7 @@ REST_FRAMEWORK = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": config("LOCATION"),
+        "LOCATION": "redis://127.0.0.1:6360/1",
         'TIMEOUT': 5*60,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
