@@ -1,0 +1,31 @@
+version: '3.7'
+
+services:
+  app:
+    build: ./app
+    container_name: 'app'
+    restart: 'always'
+    ports:
+      - "8000:8000"
+    environment:
+      - MARIADB_DATABASE='sib_cafe'
+      - MARIADB_USER='djang_user'
+      - MARIADB_PASSWORD='1234'
+      - MARIADB_ROOT_PASSWORD='1234'
+    volumes:
+      - type: "bind"
+        source: "./volumes/app"
+        target: "/app"
+    depends_on:
+      - "mariadb"
+  mariadb:
+    image: 'mariadb:latest'
+    container_name: "mariadb"
+    restart: "always"
+    expose:
+      - "3306"
+    environment:
+      - MARIADB_DATABASE='sib_cafe'
+      - MARIADB_USER='djang_user'
+      - MARIADB_PASSWORD='1234'
+      - MARIADB_ROOT_PASSWORD='1234'
